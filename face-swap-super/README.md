@@ -23,7 +23,7 @@ A cutting-edge, high-performance streaming face swap system that combines the be
 - **Quality enhancement**: Built-in GFPGAN for face restoration
 - **Flexible input/output**: Support for images, videos, and live streams
 - **Web interface**: Beautiful Gradio-based UI
-- **API endpoints**: RESTful API for integration
+- **CLI interface**: Command-line tool for batch processing
 - **Docker support**: Easy deployment and scaling
 
 ## 🛠️ Installation
@@ -38,7 +38,7 @@ cd face-swap-super
 # Build and run with Docker Compose
 docker-compose up --build
 
-# Access the web interface at http://localhost:8000
+# Access the web interface at http://localhost:7860
 ```
 
 ### Manual Installation
@@ -73,14 +73,9 @@ python main.py --mode gradio
 
 ### Web Interface (Gradio)
 ```bash
-python main.py --mode gradio --port 8000
+python main.py --mode gradio --port 7860
 ```
-Open your browser to `http://localhost:8000`
-
-### API Server
-```bash
-python main.py --mode server --host 0.0.0.0 --port 8000
-```
+Open your browser to `http://localhost:7860`
 
 ### Command Line Interface
 ```bash
@@ -96,7 +91,7 @@ python main.py --mode cli \
 docker build -t tjmance/face-swap-super .
 
 # Run container
-docker run -p 8000:8000 --gpus all tjmance/face-swap-super
+docker run -p 7860:7860 --gpus all tjmance/face-swap-super
 
 # Or use docker-compose
 docker-compose up
@@ -132,7 +127,7 @@ system:
 export FACESWAP_DEVICE=cuda
 export FACESWAP_GPU_IDS=0,1
 export FACESWAP_HOST=0.0.0.0
-export FACESWAP_PORT=8000
+export FACESWAP_PORT=7860
 ```
 
 ## 🏗️ Architecture
@@ -181,38 +176,6 @@ face-swap-super/
 └── outputs/                  # Generated outputs
 ```
 
-## 🔧 API Reference
-
-### REST API Endpoints
-
-#### Health Check
-```bash
-GET /health
-```
-
-#### Process Video
-```bash
-POST /api/process-video
-Content-Type: multipart/form-data
-
-{
-  "input_video": <file>,
-  "source_face": <file>,
-  "config": {
-    "strength": 0.8,
-    "interpolation": true
-  }
-}
-```
-
-#### WebSocket Streaming
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/stream');
-ws.onmessage = (event) => {
-  // Receive processed frame
-};
-```
-
 ## 🚀 Performance
 
 ### Benchmarks
@@ -235,7 +198,7 @@ ws.onmessage = (event) => {
 - **NSFW filtering**: Automatic content moderation
 - **Watermarking**: Optional watermarks on output
 - **Deepfake detection**: Built-in authenticity checks
-- **Rate limiting**: Prevent abuse of API endpoints
+- **File validation**: Input validation and sanitization
 
 ### Configuration
 ```yaml
@@ -243,8 +206,8 @@ security:
   enable_nsfw_filter: true
   enable_deepfake_detection: true
   watermark_enabled: true
-  rate_limiting: true
-  max_concurrent_requests: 10
+  file_validation: true
+  max_file_size: "100MB"
 ```
 
 ## 📊 Monitoring
@@ -256,14 +219,8 @@ security:
 - Queue length
 - Error rates
 
-### Prometheus Integration
-```yaml
-# prometheus.yml
-scrape_configs:
-  - job_name: 'face-swap-super'
-    static_configs:
-      - targets: ['localhost:8000']
-```
+### Local Monitoring
+Use built-in metrics displayed in the Gradio interface or enable system monitoring tools like `htop` or `nvidia-smi` to track performance.
 
 ## 🤝 Contributing
 
@@ -317,7 +274,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Multi-GPU support
 - ✅ Docker containerization
 - ✅ Web interface
-- ✅ API endpoints
+- ✅ CLI interface
 
 ### Roadmap
 - 🔄 Mobile app support

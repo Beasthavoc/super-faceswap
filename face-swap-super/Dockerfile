@@ -85,12 +85,12 @@ RUN chmod +x /app/frame_interpolation/scripts/*.py
 # Download pre-trained models (this will be done at runtime to avoid large image size)
 RUN mkdir -p /app/models/downloads
 
-# Expose ports for web interface and API
-EXPOSE 8000 8001 8002
+# Expose port for Gradio web interface
+EXPOSE 7860
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:7860 || exit 1
 
 # Create non-root user for security
 RUN useradd -m -u 1001 faceswap
@@ -98,4 +98,4 @@ RUN chown -R faceswap:faceswap /app
 USER faceswap
 
 # Default command
-CMD ["python", "main.py", "--mode", "server", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "main.py", "--mode", "gradio", "--host", "0.0.0.0", "--port", "7860"]

@@ -13,11 +13,6 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 import torch
-import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
 
 # Import our modules
@@ -49,24 +44,6 @@ class FaceSwapSuper:
         self.inference_engine = None
         self.frame_interpolator = None
         
-        # FastAPI app
-        self.app = FastAPI(
-            title="Face Swap Super",
-            description="High-performance real-time face swapping system",
-            version="1.0.0"
-        )
-        
-        # Add CORS middleware
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
-        
-        self.setup_routes()
-        
     async def initialize(self):
         """Initialize all components"""
         logger.info("Initializing Face Swap Super...")
@@ -89,56 +66,6 @@ class FaceSwapSuper:
         await self.frame_interpolator.load_models()
         
         logger.info("Face Swap Super initialized successfully!")
-        
-    def setup_routes(self):
-        """Setup FastAPI routes"""
-        
-        @self.app.get("/")
-        async def root():
-            return {"message": "Face Swap Super API", "version": "1.0.0"}
-        
-        @self.app.get("/health")
-        async def health():
-            return {"status": "healthy"}
-        
-        @self.app.get("/status")
-        async def status():
-            return {
-                "gpu_available": torch.cuda.is_available(),
-                "gpu_count": torch.cuda.device_count() if torch.cuda.is_available() else 0,
-                "device": str(self.device_manager.get_device()),
-                "models_loaded": {
-                    "face_detector": self.face_detector is not None,
-                    "face_aligner": self.face_aligner is not None,
-                    "identity_preserver": self.identity_preserver is not None,
-                    "inference_engine": self.inference_engine is not None,
-                    "frame_interpolator": self.frame_interpolator is not None,
-                }
-            }
-        
-        @self.app.websocket("/ws/stream")
-        async def websocket_stream(websocket: WebSocket):
-            """WebSocket endpoint for real-time streaming"""
-            await websocket.accept()
-            try:
-                while True:
-                    # Receive frame data
-                    data = await websocket.receive_bytes()
-                    
-                    # Process frame through pipeline
-                    result = await self.process_frame(data)
-                    
-                    # Send processed frame back
-                    await websocket.send_bytes(result)
-                    
-            except WebSocketDisconnect:
-                logger.info("Client disconnected from stream")
-            except Exception as e:
-                logger.error(f"WebSocket error: {e}")
-                await websocket.close()
-        
-        # Serve static files
-        self.app.mount("/static", StaticFiles(directory="static"), name="static")
         
     async def process_frame(self, frame_data: bytes) -> bytes:
         """Process a single frame through the complete pipeline"""
@@ -230,9 +157,9 @@ class FaceSwapSuper:
 def main():
     """Main application entry point"""
     parser = argparse.ArgumentParser(description="Face Swap Super")
-    parser.add_argument("--mode", choices=["server", "gradio", "cli"], default="server")
+    parser.add_argument("--mode", choices=["gradio", "cli"], default="gradio")
     parser.add_argument("--host", default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=7860)
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--input", help="Input video file (CLI mode)")
     parser.add_argument("--output", help="Output video file (CLI mode)")
@@ -252,21 +179,7 @@ def main():
     # Create application
     app = FaceSwapSuper(config)
     
-    if args.mode == "server":
-        # Run as FastAPI server
-        async def startup():
-            await app.initialize()
-        
-        app.app.add_event_handler("startup", startup)
-        
-        uvicorn.run(
-            app.app,
-            host=args.host,
-            port=args.port,
-            reload=args.debug
-        )
-        
-    elif args.mode == "gradio":
+    if args.mode == "gradio":
         # Run as Gradio interface
         async def run_gradio():
             await app.initialize()

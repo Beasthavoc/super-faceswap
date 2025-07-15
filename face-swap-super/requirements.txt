@@ -35,15 +35,8 @@ ffmpeg-python>=0.2.0
 moviepy>=1.0.3
 av>=10.0.0
 
-# Real-time Processing
-websockets>=11.0.0
-fastapi>=0.100.0
-uvicorn>=0.23.0
-pydantic>=2.0.0
-
 # GUI and Visualization
 gradio>=4.0.0
-streamlit>=1.25.0
 matplotlib>=3.5.0
 tqdm>=4.65.0
 
@@ -61,7 +54,6 @@ cupy-cuda12x>=12.0.0; sys_platform != "darwin"
 # torch-directml; sys_platform == "darwin"
 
 # Docker support
-gunicorn>=21.0.0
 docker>=6.0.0
 
 # Development and Testing
