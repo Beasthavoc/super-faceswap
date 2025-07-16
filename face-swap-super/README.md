@@ -32,7 +32,7 @@ A cutting-edge, high-performance streaming face swap system that combines the be
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/face-swap-super.git
+git clone https://github.com/beasthavoc/face-swap-super.git
 cd face-swap-super
 
 # Build and run with Docker Compose
@@ -52,7 +52,7 @@ docker-compose up --build
 #### Setup
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/face-swap-super.git
+git clone https://github.com/beasthavoc/face-swap-super.git
 cd face-swap-super
 
 # Create virtual environment
